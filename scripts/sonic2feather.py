@@ -62,7 +62,7 @@ class SonicFile(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Конвертация sonic-файлов в формат feather")
-    parser.add_argument("--files", nargs="+", help="Пути до sonic-файлов")
+    parser.add_argument("--files", nargs="+", help="Путь до sonic-файлов")
     args = parser.parse_args()
     
     for file in args.files:
