@@ -1,5 +1,3 @@
-# Usage: python sonic2feather.py --files path/to/file1 path/to/file2 path/to/file3
-#        python sonic2feather.py --files path/to/folder/*
 import os
 import bz2
 import argparse

@@ -1,5 +1,3 @@
-# Usage: python plot_KET.py --files path/to/file1 path/to/file2 path/to/file3
-#        python plot_KET.py --files path/to/folder/*
 import argparse
 import matplotlib.pyplot as plt
 
@@ -14,9 +12,9 @@ plt.rcParams["savefig.bbox"] = "tight"
 plt.rcParams["grid.linestyle"] = "dotted"
 
 
-DT = timedelta(minutes=1) # [мин]
-WINDOW_1 = 10             # [мин]
-WINDOW_2 = 180            # [мин]
+DT = timedelta(minutes=1) # 1 мин
+WINDOW_1 = 10             # 10 мин
+WINDOW_2 = 180            # 3 часа
 
 
 if __name__ == "__main__":

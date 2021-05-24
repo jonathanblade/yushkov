@@ -1,29 +1,68 @@
+import numpy as np
 import pandas as pd
 
-from datetime import timedelta
+
+Cp = 1005 # Дж/(кг*К)
+Cv = 717  # Дж/(кг*К)
+R = 287   # Дж/(кг*К)
 
 
 class FeatherParser(object):
 
     def __init__(self):
-        self.data = pd.DataFrame(columns=["Vx", "Vy", "Vz", "T"])
+        self.data = pd.DataFrame()
 
-    def load(self, files: list[str], dt: timedelta):
+    def load(self, files: list[str], dt=None):
         for file in files:
-            data = pd.read_feather(file).set_index("t").resample(dt).mean()
+            data = pd.read_feather(file).set_index("t")
+            if dt != None:
+                data = data.resample(dt).mean()
             self.data = self.data.append(data)
+        self.dt = self.get_dt()
 
-    def calc_fluctuations(self, param: str, window: int):
-        rolling_mean = self.data[param].rolling(window).mean()
-        fluctuations = self.data[param] - rolling_mean
-        return fluctuations
+    def get_dt(self):
+        t = self.data.index.values
+        return (t[1] - t[0]) / np.timedelta64(1, "s")
+
+    def calc_fluctuations(self, series: pd.Series, window: int):
+        rolling_mean = series.rolling(window).mean()
+        fluctuations = series - rolling_mean
+        return fluctuations.dropna()
 
     def calc_KET(self, window: int):
-        dVx = self.calc_fluctuations("Vx", window)
-        dVy = self.calc_fluctuations("Vx", window)
-        dVz = self.calc_fluctuations("Vz", window)
+        dVx = self.calc_fluctuations(self.data["Vx"], window)
+        dVy = self.calc_fluctuations(self.data["Vy"], window)
+        dVz = self.calc_fluctuations(self.data["Vz"], window)
         KET = (dVx**2 + dVy**2 + dVz**2) / 2
         return KET.to_frame(name="КЭТ")
 
-    def calc_cs(self, cp=1006, cv=717, R=1.2):
-        cs2 = (cp / cv) * R * (self.data["T"] + 273)
+    def calc_V_spectrum(self):
+        S = pd.DataFrame()
+        S["f"] = np.fft.rfftfreq(self.data.index.size, self.dt)
+        S["Vx"] = np.abs(np.fft.rfft(self.data["Vx"]))
+        S["Vy"] = np.abs(np.fft.rfft(self.data["Vy"]))
+        S["Vz"] = np.abs(np.fft.rfft(self.data["Vz"]))
+        return S.set_index("f")
+
+    def calc_dV_spectrum(self, window):
+        S = pd.DataFrame()
+        dVx = self.calc_fluctuations(self.data["Vx"], window)
+        dVy = self.calc_fluctuations(self.data["Vy"], window)
+        dVz = self.calc_fluctuations(self.data["Vz"], window)
+        S["f"] = np.fft.rfftfreq(dVx.index.size, self.dt)
+        S["dVx"] = np.abs(np.fft.rfft(dVx))
+        S["dVy"] = np.abs(np.fft.rfft(dVy))
+        S["dVz"] = np.abs(np.fft.rfft(dVz))
+        return S.set_index("f")
+
+    def calc_APE(self, window):
+        APE = Cp * (self.data["T"] + 273).rolling(window).std()
+        return APE.to_frame(name="ДПЭ")
+
+    def calc_dcs_spectrum(self, window):
+        S = pd.DataFrame()
+        cs = np.sqrt((Cp / Cv) * R * (self.data["T"] + 273))
+        dcs = self.calc_fluctuations(cs, window)
+        S["f"] = np.fft.rfftfreq(dcs.index.size, self.dt)
+        S["dcs"] = np.abs(np.fft.rfft(dcs))
+        return S.set_index("f")
