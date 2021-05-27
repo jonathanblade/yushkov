@@ -1,6 +1,7 @@
 import os
 import bz2
 import argparse
+import numpy as np
 import pandas as pd
 
 from datetime import datetime, timedelta
@@ -16,7 +17,7 @@ class SonicFile(object):
         return datetime.strptime(value, "%y%m%d%H%M%S")
 
     def str2float(self, value: str):
-        return float(value)/100
+        return float(value) / 100
 
     def read_line(self, line: str):
         decoded_line = line.decode("unicode_escape")
@@ -51,7 +52,7 @@ class SonicFile(object):
                 data = self.read_line(line)
                 if data:
                     self.data.append(data)
-        return pd.DataFrame(data=self.data)
+        return pd.DataFrame(data=self.data).astype({"t": np.datetime64, "Vx": np.float16, "Vy": np.float16, "Vz": np.float16, "T": np.float16})
 
     def save_as_feather(self):
         df = self.read()
