@@ -24,14 +24,12 @@ if __name__ == "__main__":
         parser.process(file)
         print(f"{file} ✓")
 
-    data = (pd.concat([
-            parser.data["Флуктуации скорости звука"].rename(columns={"Флуктуации скорости звука": "$Cs_{*}, м/с$"}), 
-            parser.data["Флуктуации скорости ветра"].rename(columns={"Флуктуации скорости ветра": "$V_{*}, м/c$"})])
-            .sort_index()
-            .rolling("3H")
-            .mean())
+    plot_data = pd.concat([
+        pd.concat(parser.data["Флуктуации скорости звука"]).rename(columns={"Флуктуации скорости звука": "$Cs_{*}, м/с$"})
+        pd.concat(parser.data["Флуктуации скорости ветра"]).rename(columns={"Флуктуации скорости ветра": "$V_{*}, м/с$"})
+    ]).sort_index().rolling("3H").mean()
 
-    plot = data.plot(grid=True, secondary_y="$Cs_{*}, м/с$")
+    plot = plot_data.plot(grid=True, secondary_y="$Cs_{*}, м/с$")
     
     figure = plot.get_figure()
     figure.savefig("Флуктуации_скоростей.png")

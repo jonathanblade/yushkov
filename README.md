@@ -25,8 +25,9 @@ $ python sonic2feather.py --files MSU_210201.dat.bz2 MSU_210202.dat.bz2
 ## Построение графиков
 > По умолчанию для [расчёта флуктуаций](https://github.com/jonathanblade/yushkov/blob/master/scripts/parser.py#L30) используется окно 10 минут.
 ```bash
-plot_dV_dCs.py         Флуктуации скорости ветра и скорости звука
+plot fluctuations.py   Флуктуации скорости ветра и скорости звука
 plot_KET.py            Кинетическая энергия турбулентности
+plot_spectra.py        Локальные спектры флуктуаций скорости ветра и скорости звука
 ```
 Пример:
 ```bash

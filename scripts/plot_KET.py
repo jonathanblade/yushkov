@@ -1,4 +1,5 @@
 import argparse
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from parser import FeatherParser
@@ -23,11 +24,9 @@ if __name__ == "__main__":
         parser.process(file)
         print(f"{file} ✓")
 
-    data = parser.data["КЭТ"].rolling("3H").mean()
+    plot_data = pd.concat(parser.data["КЭТ"]).rename(columns={"КЭТ": "$КЭТ, Дж/кг$"}).sort_index().rolling("3H").mean()
 
-    plot = data.plot(grid=True, logy=True, legend=False)
-    plot.set_xlabel("$t$")
-    plot.set_ylabel("$КЭТ, Дж/кг$")
+    plot = plot_data.plot(grid=True, logy=True)
     
     figure = plot.get_figure()
     figure.savefig("КЭТ.png")
