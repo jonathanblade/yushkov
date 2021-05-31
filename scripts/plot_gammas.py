@@ -25,7 +25,7 @@ if __name__ == "__main__":
         parser.process(file)
         print(f"{file} ✓")
 
-    epsCs = pd.concat(parser.data["Скорость дисспации флуктуаций скорости звука"]).rename(columns={"Скорость дисспации флуктуаций скорости звука": r"$\varepsilon_{Cs}$"})
+    epsCs = pd.concat(parser.data["Скорость диссипации флуктуаций скорости звука"]).rename(columns={"Скорость диссипации флуктуаций скорости звука": r"$\varepsilon_{Cs}$"})
     sigma2Cs = pd.concat(parser.data["Дисперсия флуктуаций скорости звука"]).rename(columns={"Дисперсия флуктуаций скорости звука": r"$\sigma^2_{Cs}$"})
     sigma4Cs = sigma2Cs.pow(2).rename(columns={r"$\sigma^2_{Cs}$": r"$\sigma^4_{Cs}$"})
 

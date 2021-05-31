@@ -21,12 +21,12 @@ class FeatherParser(object):
             "Флуктуации скорости ветра": [],
             "Спектр флуктуаций скорости ветра": [],
             "Спектр флуктуаций скорости звука": [],
-            "Скорость дисспации кинетеческой энергии": [],
-            "Скорость дисспации флуктуаций скорости звука": []
+            "Скорость диссипации кинетической энергии": [],
+            "Скорость диссипации флуктуаций скорости звука": []
         }
 
     def welch(self, x):
-        index, data = welch(x, fs=Fs)
+        index, data = welch(x, fs=Fs, nperseg=3000)
         return pd.Series(index=index, data=data).rename_axis("f")
 
     def linear_func(self, x, a, b):
@@ -72,16 +72,19 @@ class FeatherParser(object):
             SdV = dVi.apply(self.welch).sum(axis=1).to_frame("Спектр флуктуаций скорости ветра")
             self.data["Спектр флуктуаций скорости ветра"].append(SdV)
             try:
+                # Выбираем линейный интервал в спектре (всё, что больше 3 Гц)
+                mask = np.where(SdV.index.values >= 3)
+                popt, pcov = curve_fit(self.linear_func, SdV.index.values[mask]**(-5/3), SdV["Спектр флуктуаций скорости ветра"].values[mask])
                 # Скорость дисспации кинетеческой энергии 
-                # Выбираем линейный интервал в спектре (тут мужно поиграть с определением его границ)
-                popt, pcov = curve_fit(self.linear_func, SdV.index.values[15:]**(-5/3), SdV["Спектр флуктуаций скорости ветра"].values[15:])
                 epsV = (popt[0] / Kv)**1.5 * 2 * np.pi / U
-                self.data["Скорость дисспации кинетеческой энергии"].append(pd.DataFrame(index=[t], data={"Скорость дисспации кинетеческой энергии": [epsV]}).rename_axis("t"))
-                # Скорость дисспации флуктуаций скорости звука
-                popt, pcov = curve_fit(self.linear_func, SdCs.index.values[3:10]**(-5/3), SdCs["Спектр флуктуаций скорости звука"].values[3:10])
+                self.data["Скорость диссипации кинетической энергии"].append(pd.DataFrame(index=[t], data={"Скорость диссипации кинетической энергии": [epsV]}).rename_axis("t"))
+                # Выбираем линейный интервал в спектре (интервал от 0.1 Гц до 1 Гц)
+                mask = np.where((SdCs.index.values >= 0.1) & (SdCs.index.values <= 1))
+                popt, pcov = curve_fit(self.linear_func, SdCs.index.values[mask]**(-5/3), SdCs["Спектр флуктуаций скорости звука"].values[mask])
+                # Скорость дисспации флуктуаций скорости звука 
                 epsCs = (popt[0] / Kcs) * (2 * np.pi / U)**(2/3) * epsV**(1/3)
-                self.data["Скорость дисспации флуктуаций скорости звука"].append(pd.DataFrame(index=[t], data={"Скорость дисспации флуктуаций скорости звука": [epsCs]}).rename_axis("t"))
-            except ValueError:
+                self.data["Скорость диссипации флуктуаций скорости звука"].append(pd.DataFrame(index=[t], data={"Скорость диссипации флуктуаций скорости звука": [epsCs]}).rename_axis("t"))
+            except (ValueError, TypeError):
                 pass
             window_left = window_right
             window_right += timedelta(minutes=10)

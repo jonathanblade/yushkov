@@ -25,16 +25,16 @@ if __name__ == "__main__":
         parser.process(file)
         print(f"{file} ✓")
 
-    epsV = pd.concat(parser.data["Скорость дисспации кинетеческой энергии"]).rename(columns={"Скорость дисспации кинетеческой энергии": r"$\varepsilon_{V}$"})
-    epsCs = pd.concat(parser.data["Скорость дисспации флуктуаций скорости звука"]).rename(columns={"Скорость дисспации флуктуаций скорости звука": r"$\varepsilon_{Cs}$"})
+    epsV = pd.concat(parser.data["Скорость диссипации кинетической энергии"]).rename(columns={"Скорость диссипации кинетической энергии": r"$\varepsilon_{V}$"})
+    epsCs = pd.concat(parser.data["Скорость диссипации флуктуаций скорости звука"]).rename(columns={"Скорость диссипации флуктуаций скорости звука": r"$\varepsilon_{Cs}$"})
     sigma2Cs = pd.concat(parser.data["Дисперсия флуктуаций скорости звука"]).rename(columns={"Дисперсия флуктуаций скорости звука": r"$\sigma^2_{Cs}$"})
     sigma2V = pd.concat(parser.data["Дисперсия флуктуаций скорости ветра"]).rename(columns={"Дисперсия флуктуаций скорости ветра": r"$\sigma^2_{V}$"})
     
     sigma3Cs = sigma2Cs.pow(1.5).rename(columns={r"$\sigma^2_{Cs}$": r"$\sigma^3_{Cs}$"})
     sigma3V = sigma2V.pow(1.5).rename(columns={r"$\sigma^2_{V}$": r"$\sigma^3_{V}$"})
     
-    epsCs_epsV = (epsCs[r"$\varepsilon_{Cs}$"] / (4 * np.pi * np.pi * epsV[r"$\varepsilon_{V}$"])).to_frame(r"$\varepsilon_{Cs}/4\pi\varepsilon_{V}$")
-    sigma3Cs_sigma3V = (sigma2Cs[r"$\sigma^3_{Cs}$"] / sigma2V[r"$\sigma^3_{V}$"]).to_frame(r"$\sigma^3_{Cs}/\sigma^3_{V}$")
+    epsCs_epsV = (epsCs[r"$\varepsilon_{Cs}$"] / (4 * np.pi * np.pi * epsV[r"$\varepsilon_{V}$"])).to_frame(r"$\varepsilon_{Cs}/4\pi^2\varepsilon_{V}$")
+    sigma3Cs_sigma3V = (sigma3Cs[r"$\sigma^3_{Cs}$"] / sigma3V[r"$\sigma^3_{V}$"]).to_frame(r"$\sigma^3_{Cs}/\sigma^3_{V}$")
 
     plot_data = pd.concat([epsCs_epsV, sigma3Cs_sigma3V]).sort_index().rolling("3H").mean()
 

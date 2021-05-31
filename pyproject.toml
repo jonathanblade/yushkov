@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Спецкурс Юшкова"
-version = "0.1.7"
+version = "0.1.8"
 description = "Набор скриптов для выполнения заданий по спецкурсу В.П. Юшкова 'Турбулентность атмосферы в пограничном слое'"
 authors = ["Semen Syrovatskiy <mail@syrovatskiy.tk>"]
 
