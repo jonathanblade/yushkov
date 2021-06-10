@@ -10,7 +10,7 @@ $ poetry install
 
 Далее загружаем вирутальную среду:
 ```bash
-$ source .venv/bin/activate
+$ poetry shell
 ```
 
 ## Предобработка файлов
